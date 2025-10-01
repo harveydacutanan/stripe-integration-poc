@@ -276,6 +276,80 @@ public class PaymentController : ControllerBase
     }
 
     /// <summary>
+    /// Gets payment history for a customer
+    /// </summary>
+    [HttpGet("payment-history/{customerId}")]
+    public async Task<ActionResult> GetPaymentHistory(string customerId, [FromQuery] int limit = 20)
+    {
+        try
+        {
+            _logger.LogInformation("Fetching payment history for customer: {CustomerId}", customerId);
+
+            var service = new PaymentIntentService();
+            var options = new PaymentIntentListOptions
+            {
+                Customer = customerId,
+                Limit = limit,
+            };
+
+            var paymentIntents = await service.ListAsync(options);
+
+            // Fetch charge details for payment intents that have charges
+            var chargeService = new ChargeService();
+            var history = new List<object>();
+
+            foreach (var pi in paymentIntents.Data)
+            {
+                string receiptUrl = null;
+                string last4 = null;
+                string brand = null;
+
+                // If payment intent has a latest charge, fetch its details
+                if (!string.IsNullOrEmpty(pi.LatestChargeId))
+                {
+                    try
+                    {
+                        var charge = await chargeService.GetAsync(pi.LatestChargeId);
+                        receiptUrl = charge.ReceiptUrl;
+                        last4 = charge.PaymentMethodDetails?.Card?.Last4;
+                        brand = charge.PaymentMethodDetails?.Card?.Brand;
+                    }
+                    catch
+                    {
+                        // If charge fetch fails, continue without charge details
+                    }
+                }
+
+                history.Add(new
+                {
+                    id = pi.Id,
+                    amount = pi.Amount,
+                    currency = pi.Currency.ToUpper(),
+                    status = pi.Status,
+                    description = pi.Description,
+                    created = pi.Created,
+                    paymentMethodId = pi.PaymentMethodId,
+                    receiptUrl = receiptUrl,
+                    last4 = last4,
+                    brand = brand
+                });
+            }
+
+            return Ok(history);
+        }
+        catch (StripeException ex)
+        {
+            _logger.LogError(ex, "Stripe error retrieving payment history");
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving payment history");
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
     /// Creates a payment intent (simplified endpoint for ECA)
     /// </summary>
     [HttpPost("create-payment-intent")]

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECA - Payment History</title>
+    <link rel="stylesheet" href="styles/paymentHistory.css">
+</head>
+<body>
+    <div class="history-container">
+        <header class="history-header">
+            <button class="btn-back" onclick="goBack()">← Back to Dashboard</button>
+            <h1>Stripe Payment History</h1>
+        </header>
+
+        <div class="history-content">
+            <div class="customer-summary">
+                <h3>Payment history for:</h3>
+                <p><strong>Customer ID:</strong> <span id="customerIdDisplay"></span></p>
+                <p><strong>Email:</strong> <span id="customerEmailDisplay"></span></p>
+            </div>
+
+            <div id="loading" class="loading-section">
+                <div class="spinner"></div>
+                <p>Loading payment history...</p>
+            </div>
+
+            <div id="error-message" class="error-message" style="display: none;"></div>
+
+            <div id="payment-list" class="payment-list" style="display: none;">
+                <div class="list-header">
+                    <h2>Recent Transactions</h2>
+                    <p class="subtitle">Showing your most recent payments</p>
+                </div>
+
+                <div id="payments-container"></div>
+
+                <div id="no-payments" class="no-payments" style="display: none;">
+                    <div class="no-payments-icon">📭</div>
+                    <h3>No Payment History</h3>
+                    <p>You haven't made any payments yet.</p>
+                    <button class="btn-primary" onclick="makePayment()">Make Your First Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/paymentHistory.js"></script>
+</body>
+</html>
