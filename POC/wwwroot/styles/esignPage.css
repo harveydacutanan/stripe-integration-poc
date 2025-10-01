@@ -1,0 +1,156 @@
+.progress-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #ddd;
+    z-index: 0;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #BBEE00;
+    z-index: 1;
+    transition: width 0.3s ease;
+}
+
+.step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: 4px solid #ddd;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #666;
+}
+
+.step.active .step-circle {
+    border-color: #BBEE00;
+    background: #BBEE00;
+    color: #0B2828;
+}
+
+.step.completed .step-circle {
+    border-color: #0B2828;
+    background: #0B2828;
+    color: #BBEE00;
+}
+
+.step-label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 600;
+}
+
+.step.active .step-label {
+    color: #0B2828;
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.application-summary {
+    background: #f0f9e8;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #BBEE00;
+    margin-bottom: 20px;
+}
+
+.application-summary h3 {
+    margin-bottom: 15px;
+    color: #0B2828;
+}
+
+.application-summary p {
+    margin: 8px 0;
+    color: #313131;
+}
+
+.terms-box {
+    background: #f8f9fa;
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.terms-box h4 {
+    color: #0B2828;
+    margin-bottom: 10px;
+}
+
+.terms-box p {
+    color: #313131;
+    line-height: 1.6;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.signature-canvas {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: crosshair;
+    background: white;
+    display: block;
+    width: 100%;
+    max-width: 600px;
+    height: 200px;
+    margin: 0 auto;
+}
+
+.signature-canvas:focus {
+    border-color: #BBEE00;
+    outline: none;
+}
+
+.signature-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #28a745;
+    margin-top: 20px;
+    display: none;
+}
+
+.success-message h3 {
+    margin-bottom: 10px;
+}

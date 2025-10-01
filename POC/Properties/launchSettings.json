@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "POC": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "home.html",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:51880;http://localhost:51881"
+    }
+  }
+}

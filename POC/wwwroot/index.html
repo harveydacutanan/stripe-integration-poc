@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyMe - Payment Integration POC</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+    <div class="header-container">
+        <a href="home.html" class="back-button">← Back to Home</a>
+        <h1>💰 MoneyMe - Stripe Payment Integration POC</h1>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('guest-payment')">Guest Payment</button>
+            <button class="tab" onclick="showTab('customer-registration')">New Customer</button>
+            <button class="tab" onclick="showTab('returning-customer')">Returning Customer</button>
+            <button class="tab" onclick="showTab('save-card')">Save Payment Method</button>
+        </div>
+
+        <!-- Guest Payment Tab -->
+        <div id="guest-payment" class="tab-content active">
+            <h2>💳 One-Time Payment (Guest)</h2>
+            <div class="info">
+                <strong>Guest Payment:</strong> Quick payment without creating an account. No card details saved.
+            </div>
+
+            <form id="guest-payment-form">
+                <div class="form-group">
+                    <label for="guest-amount">Amount (AUD)</label>
+                    <input type="number" id="guest-amount" min="1" step="0.01" value="25.00" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="guest-card-element">Card Details</label>
+                    <div id="guest-card-element"></div>
+                    <div id="guest-card-error" class="error"></div>
+                </div>
+
+                <button type="submit" id="guest-submit-button">
+                    <span id="guest-button-text">Pay Now (Guest)</span>
+                    <span id="guest-spinner" class="hidden">Processing...</span>
+                </button>
+            </form>
+
+            <div id="guest-payment-result"></div>
+
+            <div class="info" style="background: #fff3cd; border-left: 4px solid #ffc107; margin-top: 20px;">
+                <p style="margin-bottom: 15px; font-weight: bold; color: #856404;">⚠️ IMPORTANT: Only debit and prepaid cards are accepted. Credit cards will be rejected.</p>
+            </div>
+            <div class="info">
+                <h4>🧪 Test Card Numbers</h4>
+                <p style="margin-bottom: 10px;"><strong>✅ Accepted Cards (Debit):</strong></p>
+                <p><strong>Visa Debit:</strong> 4000 0566 5566 5556</p>
+                <p><strong>Mastercard Debit:</strong> 5200 8282 8282 8210</p>
+                <p><strong>Discover Debit:</strong> 6011 9811 1111 1113</p>
+
+                <p style="margin-top: 15px; margin-bottom: 10px;"><strong>✅ Accepted Cards (Prepaid):</strong></p>
+                <p><strong>Mastercard Prepaid:</strong> 5105 1051 0510 5100</p>
+
+                <p style="margin-top: 15px; margin-bottom: 10px;"><strong>❌ Rejected Cards (Credit - For Testing):</strong></p>
+                <p><strong>Visa Credit:</strong> 4242 4242 4242 4242 (Will be rejected)</p>
+                <p><strong>Mastercard Credit:</strong> 5555 5555 5555 4444 (Will be rejected)</p>
+
+                <p style="margin-top: 10px; font-size: 14px;">Use any future expiry date and any 3-digit CVC</p>
+                <p style="margin-top: 15px; font-size: 14px;">
+                    <strong>📚 More test cards:</strong>
+                    <a href="https://docs.stripe.com/testing" target="_blank" style="color: #0B2828; text-decoration: underline;">View full Stripe testing documentation</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Customer Registration Tab -->
+        <div id="customer-registration" class="tab-content">
+            <h2>👤 New Customer Registration + Payment</h2>
+            <div class="info">
+                <strong>New Customer:</strong> Create an account and optionally save your payment method for faster future checkouts.
+            </div>
+
+            <div class="two-column">
+                <div>
+                    <h3>Customer Information</h3>
+                    <form id="customer-info-form">
+                        <div class="form-group">
+                            <label for="customer-name">Full Name</label>
+                            <input type="text" id="customer-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-email">Email Address</label>
+                            <input type="email" id="customer-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-phone">Phone Number (Optional)</label>
+                            <input type="tel" id="customer-phone">
+                        </div>
+                    </form>
+                </div>
+
+                <div>
+                    <h3>Payment Details</h3>
+                    <form id="customer-payment-form">
+                        <div class="form-group">
+                            <label for="customer-amount">Amount (AUD)</label>
+                            <input type="number" id="customer-amount" min="1" step="0.01" value="50.00" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="customer-card-element">Card Details</label>
+                            <div id="customer-card-element"></div>
+                            <div id="customer-card-error" class="error"></div>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="save-payment-method" checked>
+                            <label for="save-payment-method">💾 Save this card for faster future payments</label>
+                        </div>
+
+                        <button type="submit" id="customer-submit-button">
+                            <span id="customer-button-text">Create Account & Pay</span>
+                            <span id="customer-spinner" class="hidden">Processing...</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="customer-payment-result"></div>
+        </div>
+
+        <!-- Returning Customer Tab -->
+        <div id="returning-customer" class="tab-content">
+            <h2>🔄 Returning Customer Payment</h2>
+            <div class="info">
+                <strong>Returning Customer:</strong> Find your account by Stripe Customer ID and use saved payment methods for quick checkout.
+            </div>
+
+            <div id="customer-lookup">
+                <div class="form-group">
+                    <label for="lookup-customer-id">Stripe Customer ID</label>
+                    <input type="text" id="lookup-customer-id" placeholder="Enter your Stripe Customer ID (e.g., cus_xxxxx)">
+                </div>
+                <button type="button" onclick="lookupCustomer()">Find My Account</button>
+            </div>
+
+            <div id="customer-found" class="hidden">
+                <div class="customer-info">
+                    <h3>Welcome back, <span id="found-customer-name"></span>!</h3>
+                    <p><strong>Email:</strong> <span id="found-customer-email"></span></p>
+                    <p><strong>Customer ID:</strong> <span id="found-customer-id"></span></p>
+                </div>
+
+                <div class="two-column">
+                    <div>
+                        <h3>Saved Payment Methods</h3>
+                        <div id="saved-payment-methods"></div>
+                        <button type="button" onclick="showAddNewCard()" class="secondary">+ Add New Card</button>
+                    </div>
+
+                    <div>
+                        <h3>Quick Payment</h3>
+                        <form id="returning-payment-form">
+                            <div class="form-group">
+                                <label for="returning-amount">Amount (AUD)</label>
+                                <input type="number" id="returning-amount" min="1" step="0.01" value="75.00" required>
+                            </div>
+
+                            <div id="selected-payment-method" class="info hidden">
+                                Selected: <span id="selected-method-info"></span>
+                            </div>
+
+                            <button type="submit" id="returning-submit-button" disabled>
+                                <span id="returning-button-text">Pay with Saved Card</span>
+                                <span id="returning-spinner" class="hidden">Processing...</span>
+                            </button>
+                        </form>
+
+                        <!-- New Card Form for Returning Customers -->
+                        <div id="add-new-card-form" class="hidden">
+                            <h4>Add New Payment Method</h4>
+                            <div class="form-group">
+                                <label for="returning-card-element">New Card Details</label>
+                                <div id="returning-card-element"></div>
+                                <div id="returning-card-error" class="error"></div>
+                            </div>
+                            <button type="button" onclick="payWithNewCard()">Pay with New Card</button>
+                            <button type="button" onclick="hideAddNewCard()" class="secondary">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="returning-payment-result"></div>
+        </div>
+
+        <!-- Save Payment Method Tab -->
+        <div id="save-card" class="tab-content">
+            <h2>💾 Save Payment Method Only</h2>
+            <div class="info">
+                <strong>Save Card:</strong> Add a new payment method to your account without making a payment.
+            </div>
+
+            <div class="form-group">
+                <label for="save-customer-id">Stripe Customer ID</label>
+                <input type="text" id="save-customer-id" placeholder="Enter Stripe Customer ID (e.g., cus_xxxxx)">
+                <button type="button" onclick="findCustomerForSaving()">Find Customer</button>
+            </div>
+
+            <div id="save-customer-found" class="hidden">
+                <div class="customer-info">
+                    <h3>Adding card for: <span id="save-found-customer-name"></span></h3>
+                    <p><strong>Email:</strong> <span id="save-found-customer-email"></span></p>
+                </div>
+
+                <form id="save-card-form">
+                    <div class="form-group">
+                        <label for="save-card-element">New Card Details</label>
+                        <div id="save-card-element"></div>
+                        <div id="save-card-error" class="error"></div>
+                    </div>
+
+                    <button type="submit" id="save-card-button">
+                        <span id="save-card-button-text">Save Card</span>
+                        <span id="save-card-spinner" class="hidden">Processing...</span>
+                    </button>
+                </form>
+
+                <div id="save-card-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyMe - Stripe Payment Integration POC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0B2828;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            padding: 60px 80px;
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #0B2828 0%, #1a4040 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #BBEE00;
+            border: 4px solid #BBEE00;
+        }
+
+        h1 {
+            color: #0B2828;
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #BBEE00;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        p {
+            color: #313131;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: #BBEE00;
+            color: #0B2828;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(187, 238, 0, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 30px rgba(187, 238, 0, 0.5);
+            background: #d4ff33;
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-secondary {
+            background: #0B2828;
+            color: #BBEE00;
+            border: 2px solid #BBEE00;
+        }
+
+        .btn-secondary:hover {
+            background: #1a4040;
+            color: #d4ff33;
+            border-color: #d4ff33;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 30px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">💰</div>
+        <h1>MoneyMe</h1>
+        <div class="subtitle">Stripe Payment Integration POC</div>
+        <p>Welcome to the MoneyMe payment integration proof of concept. Test our secure Stripe payment processing with customer registration and saved payment methods.</p>
+        <div class="btn-group">
+            <a href="index.html" class="btn">Payment Testing Portal</a>
+            <a href="ApplicationFlow/PersonalInfo.html" class="btn btn-secondary">Start New Application</a>
+        </div>
+    </div>
+</body>
+</html>

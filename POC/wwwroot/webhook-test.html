@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook Testing - Stripe POC</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .status.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background: #635bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #4f46e5;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        .webhook-info {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .endpoint-url {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        .event-log {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        .log-entry {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-left: 4px solid #635bff;
+            border-radius: 0 4px 4px 0;
+        }
+        .log-timestamp {
+            color: #6c757d;
+            font-size: 12px;
+        }
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🔗 Webhook Testing Dashboard</h1>
+
+    <div class="container">
+        <h2>Webhook Configuration</h2>
+        <div id="webhook-config" class="webhook-info">
+            <h3>Loading configuration...</h3>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="two-column">
+            <div>
+                <h3>📍 Webhook Endpoint</h3>
+                <p><strong>URL:</strong> <span class="endpoint-url" id="webhook-url">Loading...</span></p>
+                <p><strong>Method:</strong> POST</p>
+                <p><strong>Content-Type:</strong> application/json</p>
+
+                <h4>Supported Events:</h4>
+                <ul id="supported-events">
+                    <li>Loading...</li>
+                </ul>
+
+                <button onclick="testWebhookEndpoint()">🧪 Test Endpoint</button>
+                <button onclick="getWebhookConfig()">🔧 Check Configuration</button>
+            </div>
+
+            <div>
+                <h3>🎯 Quick Actions</h3>
+                <button onclick="simulateEvent('payment_intent.succeeded')">✅ Simulate Payment Success</button>
+                <button onclick="simulateEvent('payment_intent.payment_failed')">❌ Simulate Payment Failed</button>
+                <button onclick="simulateEvent('setup_intent.succeeded')">💾 Simulate Card Saved</button>
+                <button onclick="simulateEvent('customer.created')">👤 Simulate Customer Created</button>
+                <button onclick="clearLog()">🗑️ Clear Log</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>📋 Webhook Event Log</h3>
+        <div id="event-log" class="event-log">
+            <div class="log-entry">
+                <div class="log-timestamp">Ready to receive webhook events...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>🛠️ Setup Instructions</h3>
+        <div class="two-column">
+            <div>
+                <h4>1. Stripe Dashboard Setup</h4>
+                <ol>
+                    <li>Go to <a href="https://dashboard.stripe.com/webhooks" target="_blank">Stripe Webhooks</a></li>
+                    <li>Click "Add endpoint"</li>
+                    <li>Enter your webhook URL: <code id="full-webhook-url">Loading...</code></li>
+                    <li>Select events to send (or select all)</li>
+                    <li>Copy the signing secret</li>
+                </ol>
+            </div>
+
+            <div>
+                <h4>2. Local Configuration</h4>
+                <ol>
+                    <li>Update <code>appsettings.json</code>:</li>
+                    <li>Add your webhook secret to <code>Stripe:WebhookSecret</code></li>
+                    <li>Ensure your API keys are configured</li>
+                    <li>Test the endpoint using the buttons above</li>
+                </ol>
+
+                <h4>3. For Development</h4>
+                <p>Use <a href="https://stripe.com/docs/stripe-cli" target="_blank">Stripe CLI</a> to forward events:</p>
+                <pre><code>stripe listen --forward-to localhost:5000/api/webhook/stripe</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>📖 Example Webhook Payloads</h3>
+        <div class="two-column">
+            <div>
+                <h4>Payment Succeeded</h4>
+                <pre><code>{
+  "id": "evt_test_webhook",
+  "object": "event",
+  "type": "payment_intent.succeeded",
+  "data": {
+    "object": {
+      "id": "pi_test_1234",
+      "amount": 2000,
+      "currency": "usd",
+      "status": "succeeded"
+    }
+  }
+}</code></pre>
+            </div>
+
+            <div>
+                <h4>Setup Intent Succeeded</h4>
+                <pre><code>{
+  "id": "evt_test_webhook",
+  "object": "event",
+  "type": "setup_intent.succeeded",
+  "data": {
+    "object": {
+      "id": "seti_test_1234",
+      "customer": "cus_test_1234",
+      "status": "succeeded"
+    }
+  }
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize webhook testing dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadWebhookConfig();
+            updateWebhookUrl();
+        });
+
+        function updateWebhookUrl() {
+            const baseUrl = window.location.origin;
+            const webhookPath = '/api/webhook/stripe';
+            const fullUrl = baseUrl + webhookPath;
+
+            document.getElementById('webhook-url').textContent = webhookPath;
+            document.getElementById('full-webhook-url').textContent = fullUrl;
+        }
+
+        async function loadWebhookConfig() {
+            try {
+                const response = await fetch('/api/webhook/config');
+                const config = await response.json();
+
+                const configDiv = document.getElementById('webhook-config');
+                const eventsUl = document.getElementById('supported-events');
+
+                if (config.hasWebhookSecret) {
+                    configDiv.innerHTML = `
+                        <div class="status success">
+                            <h3>✅ Webhook Configuration Complete</h3>
+                            <p>Webhook secret is configured and endpoint is ready to receive events.</p>
+                            <p><strong>Endpoint:</strong> ${config.webhookEndpoint}</p>
+                        </div>
+                    `;
+                } else {
+                    configDiv.innerHTML = `
+                        <div class="status error">
+                            <h3>⚠️ Webhook Configuration Incomplete</h3>
+                            <p>Webhook secret is not configured. Please add your Stripe webhook secret to appsettings.json</p>
+                            <p><strong>Missing:</strong> Stripe:WebhookSecret configuration</p>
+                        </div>
+                    `;
+                }
+
+                // Update supported events
+                eventsUl.innerHTML = '';
+                config.supportedEvents.forEach(event => {
+                    const li = document.createElement('li');
+                    li.textContent = event;
+                    eventsUl.appendChild(li);
+                });
+
+            } catch (error) {
+                logEvent('Error loading webhook config: ' + error.message, 'error');
+            }
+        }
+
+        async function testWebhookEndpoint() {
+            try {
+                logEvent('Testing webhook endpoint...', 'info');
+
+                const response = await fetch('/api/webhook/test');
+                const result = await response.json();
+
+                if (response.ok) {
+                    logEvent(`✅ Webhook endpoint test successful: ${result.message}`, 'success');
+                    logEvent(`Configuration status: ${result.configured ? 'Complete' : 'Incomplete'}`, 'info');
+                } else {
+                    logEvent(`❌ Webhook endpoint test failed: ${result.message || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                logEvent(`❌ Error testing webhook endpoint: ${error.message}`, 'error');
+            }
+        }
+
+        async function getWebhookConfig() {
+            try {
+                logEvent('Checking webhook configuration...', 'info');
+                await loadWebhookConfig();
+                logEvent('✅ Configuration check complete', 'success');
+            } catch (error) {
+                logEvent(`❌ Error checking configuration: ${error.message}`, 'error');
+            }
+        }
+
+        async function simulateEvent(eventType) {
+            try {
+                logEvent(`🎭 Simulating event: ${eventType}...`, 'info');
+
+                const response = await fetch(`/api/webhook/simulate/${eventType}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        test: true,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    logEvent(`✅ ${result.message}`, 'success');
+                } else {
+                    logEvent(`❌ Simulation failed: ${result.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                logEvent(`❌ Error simulating event: ${error.message}`, 'error');
+            }
+        }
+
+        function clearLog() {
+            const eventLog = document.getElementById('event-log');
+            eventLog.innerHTML = `
+                <div class="log-entry">
+                    <div class="log-timestamp">Log cleared - Ready to receive webhook events...</div>
+                </div>
+            `;
+        }
+
+        function logEvent(message, type = 'info') {
+            const eventLog = document.getElementById('event-log');
+            const timestamp = new Date().toLocaleString();
+
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+
+            const statusClass = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+
+            logEntry.innerHTML = `
+                <div class="status ${statusClass}" style="margin: 0; padding: 5px;">
+                    ${message}
+                </div>
+                <div class="log-timestamp">${timestamp}</div>
+            `;
+
+            eventLog.appendChild(logEntry);
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+
+        // Auto-refresh configuration every 30 seconds
+        setInterval(loadWebhookConfig, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyMe - Personal Information</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../styles/personalInfo.css">
+</head>
+<body>
+    <div class="header-container">
+        <a href="../home.html" class="back-button">← Back to Home</a>
+        <h1>💰 MoneyMe - Application Flow</h1>
+    </div>
+
+    <div class="container">
+        <div class="progress-bar step-1">
+            <div class="step active">
+                <div class="step-circle">1</div>
+                <div class="step-label">Personal Info</div>
+            </div>
+            <div class="step">
+                <div class="step-circle">2</div>
+                <div class="step-label">Card Details</div>
+            </div>
+            <div class="step">
+                <div class="step-circle">3</div>
+                <div class="step-label">E-Sign</div>
+            </div>
+        </div>
+
+        <h2>Step 1: Personal Information</h2>
+        <div class="info">
+            Please provide your personal details to begin the application process.
+        </div>
+
+        <form id="personal-info-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first-name">First Name *</label>
+                    <input type="text" id="first-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="last-name">Last Name *</label>
+                    <input type="text" id="last-name" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number *</label>
+                <input type="tel" id="phone" required>
+            </div>
+
+            <div class="form-group">
+                <label for="dob">Date of Birth *</label>
+                <input type="date" id="dob" required>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Street Address *</label>
+                <input type="text" id="address" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city">City *</label>
+                    <input type="text" id="city" required>
+                </div>
+                <div class="form-group">
+                    <label for="state">State *</label>
+                    <select id="state" required>
+                        <option value="">Select State</option>
+                        <option value="NSW">New South Wales</option>
+                        <option value="VIC">Victoria</option>
+                        <option value="QLD">Queensland</option>
+                        <option value="WA">Western Australia</option>
+                        <option value="SA">South Australia</option>
+                        <option value="TAS">Tasmania</option>
+                        <option value="ACT">Australian Capital Territory</option>
+                        <option value="NT">Northern Territory</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="postcode">Postcode *</label>
+                <input type="text" id="postcode" pattern="[0-9]{4}" maxlength="4" required>
+            </div>
+
+            <div class="info" id="customer-creation-section" style="display: none;">
+                <h4 style="margin-bottom: 10px;">Step 1: Create Stripe Customer</h4>
+                <p style="margin-bottom: 15px;">Before proceeding, we need to create a customer record in Stripe.</p>
+                <button type="button" id="create-customer-btn" class="secondary">
+                    <span id="create-customer-text">Create Stripe Customer</span>
+                    <span id="create-customer-spinner" class="hidden">Creating...</span>
+                </button>
+                <div id="customer-result" style="margin-top: 15px;"></div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="secondary" onclick="window.location.href='../home.html'">Cancel</button>
+                <button type="submit" id="next-button" disabled>Next: Card Details →</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="../scripts/personalInfo.js"></script>
+</body>
+</html>

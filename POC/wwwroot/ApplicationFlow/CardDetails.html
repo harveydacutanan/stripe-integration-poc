@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyMe - Card Details</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../styles/cardDetails.css">
+</head>
+<body>
+    <div class="header-container">
+        <a href="PersonalInfo.html" class="back-button">← Back</a>
+        <h1>💰 MoneyMe - Application Flow</h1>
+    </div>
+
+    <div class="container">
+        <div class="progress-bar">
+            <div class="step completed">
+                <div class="step-circle">✓</div>
+                <div class="step-label">Personal Info</div>
+            </div>
+            <div class="step active">
+                <div class="step-circle">2</div>
+                <div class="step-label">Card Details</div>
+            </div>
+            <div class="step">
+                <div class="step-circle">3</div>
+                <div class="step-label">E-Sign</div>
+            </div>
+        </div>
+
+        <h2>Step 2: Card Details</h2>
+
+        <div class="customer-summary" id="customer-summary">
+            <h3>Your Information</h3>
+            <p><strong>Name:</strong> <span id="summary-name"></span></p>
+            <p><strong>Email:</strong> <span id="summary-email"></span></p>
+            <p><strong>Phone:</strong> <span id="summary-phone"></span></p>
+        </div>
+
+        <div class="info" style="background: #f0f9e8; border-left: 4px solid #BBEE00;">
+            <h4 style="margin-bottom: 10px; color: #0B2828;">Stripe Customer Information</h4>
+            <p><strong>Stripe Customer ID:</strong> <code style="background: #fff; padding: 2px 6px; border-radius: 4px;" id="stripe-customer-id"></code></p>
+        </div>
+
+        <div class="info">
+            Please provide your payment card details. Your card will be securely saved for future transactions.
+        </div>
+
+        <div class="info" id="setup-intent-section" style="display: none; background: #f0f9e8; border-left: 4px solid #BBEE00;">
+            <h4 style="margin-bottom: 10px; color: #0B2828;">Step 2A: Create SetupIntent</h4>
+            <p style="margin-bottom: 15px;">Before saving your card, we need to create a SetupIntent with your Stripe Customer.</p>
+            <button type="button" id="create-setupintent-btn" class="secondary">
+                <span id="create-setupintent-text">Create SetupIntent</span>
+                <span id="create-setupintent-spinner" class="hidden">Creating...</span>
+            </button>
+            <div id="setupintent-result" style="margin-top: 15px;"></div>
+        </div>
+
+        <form id="card-details-form" style="display: none;">
+            <div class="form-group">
+                <label for="card-element">Card Information *</label>
+                <div id="card-element"></div>
+                <div id="card-validation-info" style="margin-top: 10px; padding: 10px; border-radius: 6px; display: none; background: #f0f9e8; border-left: 4px solid #BBEE00;">
+                    <p style="margin: 0; font-size: 14px; color: #0B2828;">
+                        <strong>Card Type:</strong> <span id="card-brand-display"></span> |
+                        <strong>Funding:</strong> <span id="card-funding-display"></span>
+                    </p>
+                </div>
+                <div id="card-error" class="error"></div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="secondary" onclick="window.location.href='PersonalInfo.html'">← Previous</button>
+                <button type="submit" id="submit-button">
+                    <span id="button-text">Save Card & Continue →</span>
+                    <span id="spinner" class="hidden">Processing...</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="container">
+        <h3>🧪 Test Card Numbers</h3>
+        <div class="info" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+            <p style="margin-bottom: 15px; font-weight: bold; color: #856404;">⚠️ IMPORTANT: Only debit and prepaid cards are accepted. Credit cards will be rejected.</p>
+        </div>
+        <div class="info">
+            <p style="margin-bottom: 10px;"><strong>✅ Accepted Cards (Debit):</strong></p>
+            <p><strong>Visa Debit:</strong> 4000 0566 5566 5556</p>
+            <p><strong>Mastercard Debit:</strong> 5200 8282 8282 8210</p>
+            <p><strong>Discover Debit:</strong> 6011 9811 1111 1113</p>
+
+            <p style="margin-top: 15px; margin-bottom: 10px;"><strong>✅ Accepted Cards (Prepaid):</strong></p>
+            <p><strong>Mastercard Prepaid:</strong> 5105 1051 0510 5100</p>
+
+            <p style="margin-top: 15px; margin-bottom: 10px;"><strong>❌ Rejected Cards (Credit - For Testing):</strong></p>
+            <p><strong>Visa Credit:</strong> 4242 4242 4242 4242 (Will be rejected)</p>
+            <p><strong>Mastercard Credit:</strong> 5555 5555 5555 4444 (Will be rejected)</p>
+
+            <p style="margin-top: 10px; font-size: 14px;">Use any future expiry date and any 3-digit CVC</p>
+            <p style="margin-top: 15px; font-size: 14px;">
+                <strong>📚 More test cards:</strong>
+                <a href="https://docs.stripe.com/testing" target="_blank" style="color: #0B2828; text-decoration: underline;">View full Stripe testing documentation</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="../scripts/cardDetails.js"></script>
+</body>
+</html>

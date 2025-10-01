@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyMe - Electronic Signature</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../styles/esignPage.css">
+</head>
+<body>
+    <div class="header-container">
+        <a href="CardDetails.html" class="back-button">← Back</a>
+        <h1>💰 MoneyMe - Application Flow</h1>
+    </div>
+
+    <div class="container">
+        <div class="progress-bar">
+            <div class="step completed">
+                <div class="step-circle">✓</div>
+                <div class="step-label">Personal Info</div>
+            </div>
+            <div class="step completed">
+                <div class="step-circle">✓</div>
+                <div class="step-label">Card Details</div>
+            </div>
+            <div class="step active">
+                <div class="step-circle">3</div>
+                <div class="step-label">E-Sign</div>
+            </div>
+        </div>
+
+        <h2>Step 3: Electronic Signature</h2>
+
+        <div class="application-summary" id="application-summary">
+            <h3>Application Summary</h3>
+            <p><strong>Name:</strong> <span id="summary-name"></span></p>
+            <p><strong>Email:</strong> <span id="summary-email"></span></p>
+            <p><strong>Phone:</strong> <span id="summary-phone"></span></p>
+            <p><strong>Address:</strong> <span id="summary-address"></span></p>
+        </div>
+
+        <div class="info" style="background: #f0f9e8; border-left: 4px solid #BBEE00;">
+            <h4 style="margin-bottom: 10px; color: #0B2828;">Stripe Customer Details</h4>
+            <p><strong>Stripe Customer ID:</strong> <code style="background: #fff; padding: 2px 6px; border-radius: 4px;" id="stripe-customer-id"></code></p>
+            <p><strong>Customer Status:</strong> <span id="customer-status"></span></p>
+        </div>
+
+        <div class="info" style="background: #f0f9e8; border-left: 4px solid #BBEE00; margin-top: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="margin: 0; color: #0B2828;">Payment Method Details</h4>
+                <span id="stripe-data-indicator" style="background: #BBEE00; color: #0B2828; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold;">
+                    🔄 LOADING FROM STRIPE...
+                </span>
+            </div>
+
+            <p><strong>SetupIntent ID:</strong> <code style="background: #fff; padding: 2px 6px; border-radius: 4px;" id="setupintent-id"></code></p>
+            <p><strong>SetupIntent Status:</strong> <span id="setupintent-status"></span></p>
+
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 15px 0;">
+
+            <p style="font-weight: bold; color: #0B2828; margin-bottom: 10px;">📡 Live Data from Stripe API:</p>
+
+            <p><strong>Payment Method ID:</strong> <code style="background: #fff; padding: 2px 6px; border-radius: 4px;" id="payment-method-id"></code></p>
+            <p><strong>Type:</strong> <span id="pm-type"></span></p>
+            <p><strong>Created:</strong> <span id="pm-created"></span></p>
+            <p><strong>Attached to Customer:</strong> <code style="background: #fff; padding: 2px 6px; border-radius: 4px;" id="pm-customer-id"></code></p>
+
+            <div style="background: #fff; padding: 12px; border-radius: 6px; margin-top: 10px;">
+                <p style="font-weight: bold; margin-bottom: 8px; color: #0B2828;">💳 Card Information:</p>
+                <p><strong>Card:</strong> <span id="summary-card"></span></p>
+                <p><strong>Funding:</strong> <span id="pm-card-funding"></span></p>
+                <p><strong>Country:</strong> <span id="pm-card-country"></span></p>
+                <p><strong>Fingerprint:</strong> <code style="background: #f5f5f7; padding: 2px 6px; border-radius: 4px; font-size: 11px;" id="pm-card-fingerprint"></code></p>
+            </div>
+
+            <div style="background: #fff; padding: 12px; border-radius: 6px; margin-top: 10px;">
+                <p style="font-weight: bold; margin-bottom: 8px; color: #0B2828;">📋 Billing Details:</p>
+                <p><strong>Name:</strong> <span id="pm-billing-name"></span></p>
+                <p><strong>Email:</strong> <span id="pm-billing-email"></span></p>
+                <p><strong>Phone:</strong> <span id="pm-billing-phone"></span></p>
+                <p><strong>Address:</strong> <span id="pm-billing-address"></span></p>
+            </div>
+        </div>
+
+        <div class="info">
+            Please review the terms and conditions below and provide your electronic signature to complete your application.
+        </div>
+
+        <form id="esign-form">
+            <div class="terms-box">
+                <h4>Terms and Conditions</h4>
+                <p><strong>MoneyMe Payment Terms and Conditions</strong></p>
+                <p>By signing this document, you agree to the following terms:</p>
+                <p>1. <strong>Payment Authorization:</strong> You authorize MoneyMe to charge the payment method provided for any amounts owed for services or products purchased.</p>
+                <p>2. <strong>Automatic Payments:</strong> You authorize MoneyMe to automatically charge your saved payment method for recurring payments as applicable.</p>
+                <p>3. <strong>Payment Method Storage:</strong> You consent to MoneyMe securely storing your payment method information with our payment processor, Stripe, for future transactions.</p>
+                <p>4. <strong>Payment Processing:</strong> All payments are processed securely through Stripe. MoneyMe does not store your complete card details on our servers.</p>
+                <p>5. <strong>Refund Policy:</strong> Refunds are subject to our refund policy and will be processed to the original payment method within 5-10 business days.</p>
+                <p>6. <strong>Privacy:</strong> Your personal and payment information will be handled in accordance with our Privacy Policy and applicable data protection laws.</p>
+                <p>7. <strong>Updates:</strong> You agree to notify MoneyMe of any changes to your payment information or contact details.</p>
+                <p>8. <strong>Disputes:</strong> Any disputes regarding charges must be reported within 60 days of the transaction date.</p>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="accept-terms" required>
+                <label for="accept-terms">I have read and agree to the Terms and Conditions *</label>
+            </div>
+
+            <div class="form-group">
+                <label for="signature-canvas">Electronic Signature *</label>
+                <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Please sign below using your mouse or touchscreen</p>
+                <canvas id="signature-canvas" class="signature-canvas"></canvas>
+                <div class="signature-controls">
+                    <button type="button" class="secondary" onclick="clearSignature()">Clear Signature</button>
+                </div>
+                <div id="signature-error" class="error"></div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="secondary" onclick="window.location.href='CardDetails.html'">← Previous</button>
+                <button type="submit" id="submit-button">
+                    <span id="button-text">Complete Application ✓</span>
+                    <span id="spinner" class="hidden">Processing...</span>
+                </button>
+            </div>
+        </form>
+
+        <div class="success-message" id="success-message">
+            <h3>✓ Application Submitted Successfully!</h3>
+            <p>Thank you for completing your application. Your information has been securely saved.</p>
+            <p><strong>Application ID:</strong> <span id="application-id"></span></p>
+            <button type="button" onclick="window.location.href='../home.html'">Return to Home</button>
+        </div>
+    </div>
+
+    <script src="../scripts/esignPage.js"></script>
+</body>
+</html>
