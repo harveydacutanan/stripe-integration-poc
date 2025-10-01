@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECA - Make Payment</title>
+    <link rel="stylesheet" href="styles/payment.css">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <div class="payment-container">
+        <header class="payment-header">
+            <button class="btn-back" onclick="goBack()">← Back to Dashboard</button>
+            <h1>Make a Payment</h1>
+        </header>
+
+        <div class="payment-content">
+            <div class="customer-summary">
+                <h3>Paying as:</h3>
+                <p><strong>Customer ID:</strong> <span id="customerIdDisplay"></span></p>
+                <p><strong>Email:</strong> <span id="customerEmailDisplay"></span></p>
+            </div>
+
+            <div class="payment-form-card">
+                <h2>Payment Details</h2>
+
+                <form id="paymentForm">
+                    <div class="form-group">
+                        <label for="amount">Amount (AUD)</label>
+                        <div class="amount-input-group">
+                            <span class="currency-symbol">$</span>
+                            <input
+                                type="number"
+                                id="amount"
+                                name="amount"
+                                min="1"
+                                step="0.01"
+                                placeholder="0.00"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Payment Description</label>
+                        <input
+                            type="text"
+                            id="description"
+                            name="description"
+                            placeholder="What is this payment for?"
+                            required
+                        >
+                    </div>
+
+                    <div class="payment-method-section">
+                        <h3>Payment Method</h3>
+
+                        <!-- Saved Cards Section -->
+                        <div id="saved-cards-section" style="display: none;">
+                            <div class="saved-cards-list" id="saved-cards-list"></div>
+                            <button type="button" id="use-new-card-btn" class="btn-link">+ Use a different card</button>
+                        </div>
+
+                        <!-- New Card Section -->
+                        <div id="new-card-section">
+                            <div id="card-element" class="stripe-card-element"></div>
+                            <div id="card-errors" class="error-message"></div>
+
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="save-card-checkbox">
+                                    <span>Save this card for future payments</span>
+                                </label>
+                            </div>
+
+                            <button type="button" id="use-saved-card-btn" class="btn-link" style="display: none;">← Use a saved card</button>
+                        </div>
+                    </div>
+
+                    <div id="processingMessage" class="processing-message" style="display: none;">
+                        <div class="spinner"></div>
+                        <span>Processing payment...</span>
+                    </div>
+
+                    <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+                    <div id="successMessage" class="success-message" style="display: none;">
+                        <h3>✓ Payment Successful!</h3>
+                        <p>Your payment has been processed successfully.</p>
+                        <p><strong>Payment ID:</strong> <span id="paymentIntentId"></span></p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="goBack()">Cancel</button>
+                        <button type="submit" id="submitBtn" class="btn-primary">Process Payment</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="test-cards-info">
+                <h3>Test Card Numbers</h3>
+                <p style="background: #fff3cd; padding: 10px; border-radius: 6px; margin-bottom: 15px; color: #856404;">
+                    <strong>⚠️ IMPORTANT:</strong> Only debit and prepaid cards are accepted. Credit cards will be rejected.
+                </p>
+
+                <p style="margin-bottom: 10px;"><strong>✅ Accepted Cards (Debit):</strong></p>
+                <ul>
+                    <li><code>4000 0566 5566 5556</code> - Visa Debit</li>
+                    <li><code>5200 8282 8282 8210</code> - Mastercard Debit</li>
+                    <li><code>6011 9811 1111 1113</code> - Discover Debit</li>
+                </ul>
+
+                <p style="margin-top: 15px; margin-bottom: 10px;"><strong>✅ Accepted Cards (Prepaid):</strong></p>
+                <ul>
+                    <li><code>5105 1051 0510 5100</code> - Mastercard Prepaid</li>
+                </ul>
+
+                <p style="margin-top: 15px; margin-bottom: 10px;"><strong>❌ Rejected Cards (Credit - For Testing):</strong></p>
+                <ul>
+                    <li><code>4242 4242 4242 4242</code> - Visa Credit (Will be rejected)</li>
+                    <li><code>5555 5555 5555 4444</code> - Mastercard Credit (Will be rejected)</li>
+                </ul>
+
+                <p style="margin-top: 10px;"><small>Use any future expiry date and any 3-digit CVC</small></p>
+                <p style="margin-top: 15px;">
+                    <strong>📚 More test cards:</strong>
+                    <a href="https://docs.stripe.com/testing" target="_blank" style="color: #667eea; text-decoration: underline;">View full Stripe testing documentation</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/payment.js"></script>
+</body>
+</html>

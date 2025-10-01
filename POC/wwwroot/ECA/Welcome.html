@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECA - Welcome Dashboard</title>
+    <link rel="stylesheet" href="styles/welcome.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1>Welcome Dashboard</h1>
+                <div class="user-info">
+                    <span id="userEmail">Loading...</span>
+                    <button id="logoutBtn" class="btn-logout">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            <div class="customer-info-card">
+                <h2>Your Account Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Customer ID:</label>
+                        <span id="displayCustomerId" class="info-value"></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Email:</label>
+                        <span id="displayEmail" class="info-value"></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Account Status:</label>
+                        <span class="info-value status-active">Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-section">
+                <h2>Quick Actions</h2>
+                <div class="action-cards">
+                    <div class="action-card" id="makePaymentCard">
+                        <div class="action-icon">💳</div>
+                        <h3>Make a Payment</h3>
+                        <p>Process a payment using your saved payment methods or add a new one</p>
+                        <button class="btn-action" onclick="navigateToPayment()">Go to Payment</button>
+                    </div>
+
+                    <div class="action-card">
+                        <div class="action-icon">📋</div>
+                        <h3>Payment History</h3>
+                        <p>View your past transactions and payment history</p>
+                        <button class="btn-action" disabled>Coming Soon</button>
+                    </div>
+
+                    <!-- <div class="action-card">
+                        <div class="action-icon">💰</div>
+                        <h3>Saved Payment Methods</h3>
+                        <p>Manage your saved cards and payment methods</p>
+                        <button class="btn-action" disabled>Coming Soon</button>
+                    </div>
+
+                    <div class="action-card">
+                        <div class="action-icon">⚙️</div>
+                        <h3>Account Settings</h3>
+                        <p>Update your account information and preferences</p>
+                        <button class="btn-action" disabled>Coming Soon</button>
+                    </div> -->
+                </div>
+            </div>
+
+            <div class="info-banner">
+                <strong>Demo Mode:</strong> This is a demonstration of the Existing Customer Area.
+                Only payment processing is currently functional using your Stripe Customer ID.
+            </div>
+        </main>
+    </div>
+
+    <script src="scripts/welcome.js"></script>
+</body>
+</html>

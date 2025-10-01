@@ -204,6 +204,146 @@ public class PaymentController : ControllerBase
             return StatusCode(500, new { error = "Internal server error" });
         }
     }
+
+    /// <summary>
+    /// Gets saved payment methods for a customer
+    /// </summary>
+    [HttpGet("saved-payment-methods/{customerId}")]
+    public async Task<ActionResult> GetSavedPaymentMethods(string customerId)
+    {
+        try
+        {
+            _logger.LogInformation("Fetching saved payment methods for customer: {CustomerId}", customerId);
+
+            var service = new PaymentMethodService();
+            var options = new PaymentMethodListOptions
+            {
+                Customer = customerId,
+                Type = "card",
+            };
+
+            var paymentMethods = await service.ListAsync(options);
+
+            var response = paymentMethods.Data.Select(pm => new
+            {
+                id = pm.Id,
+                brand = pm.Card.Brand,
+                last4 = pm.Card.Last4,
+                expMonth = pm.Card.ExpMonth,
+                expYear = pm.Card.ExpYear,
+                isDefault = false // You can implement default logic if needed
+            });
+
+            return Ok(response);
+        }
+        catch (StripeException ex)
+        {
+            _logger.LogError(ex, "Stripe error retrieving payment methods");
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving payment methods");
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Detaches (removes) a payment method from a customer
+    /// </summary>
+    [HttpDelete("payment-method/{paymentMethodId}")]
+    public async Task<ActionResult> DetachPaymentMethod(string paymentMethodId)
+    {
+        try
+        {
+            _logger.LogInformation("Detaching payment method: {PaymentMethodId}", paymentMethodId);
+
+            var service = new PaymentMethodService();
+            var paymentMethod = await service.DetachAsync(paymentMethodId);
+
+            return Ok(new { success = true, message = "Payment method removed successfully" });
+        }
+        catch (StripeException ex)
+        {
+            _logger.LogError(ex, "Stripe error detaching payment method");
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error detaching payment method");
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Creates a payment intent (simplified endpoint for ECA)
+    /// </summary>
+    [HttpPost("create-payment-intent")]
+    public async Task<ActionResult> CreatePaymentIntent([FromBody] CreatePaymentIntentRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("Creating payment intent for customer: {CustomerId}, amount: {Amount}",
+                request.CustomerId, request.Amount);
+
+            var options = new PaymentIntentCreateOptions
+            {
+                Amount = request.Amount,
+                Currency = request.Currency ?? "aud",
+                Customer = request.CustomerId,
+                Description = request.Description,
+            };
+
+            // If payment method is provided, use it directly
+            if (!string.IsNullOrEmpty(request.PaymentMethodId))
+            {
+                options.PaymentMethod = request.PaymentMethodId;
+            }
+            else
+            {
+                // Only use automatic payment methods when no specific method is provided
+                options.AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
+                {
+                    Enabled = true,
+                };
+            }
+
+            // Save payment method for future use if requested
+            if (request.SavePaymentMethod)
+            {
+                options.SetupFutureUsage = "off_session";
+            }
+
+            var service = new PaymentIntentService();
+            var paymentIntent = await service.CreateAsync(options);
+
+            return Ok(new
+            {
+                clientSecret = paymentIntent.ClientSecret,
+                paymentIntentId = paymentIntent.Id
+            });
+        }
+        catch (StripeException ex)
+        {
+            _logger.LogError(ex, "Stripe error creating payment intent");
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating payment intent");
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+}
+
+public class CreatePaymentIntentRequest
+{
+    public long Amount { get; set; }
+    public string? Currency { get; set; }
+    public string? CustomerId { get; set; }
+    public string? PaymentMethodId { get; set; }
+    public string? Description { get; set; }
+    public bool SavePaymentMethod { get; set; }
 }
 
 public class SavedPaymentRequest

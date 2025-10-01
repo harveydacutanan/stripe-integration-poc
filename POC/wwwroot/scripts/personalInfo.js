@@ -1,5 +1,25 @@
 let createdStripeCustomerId = null;
 
+// Populate test data button
+document.getElementById('populate-test-data').addEventListener('click', function() {
+    const timestamp = new Date().getTime().toString().slice(-6);
+    const today = new Date();
+    const birthDate = new Date(today.getFullYear() - 30, today.getMonth(), today.getDate());
+
+    document.getElementById('first-name').value = `wagtest${timestamp}`;
+    document.getElementById('last-name').value = 'User';
+    document.getElementById('email').value = `wagtest${timestamp}@test.com`;
+    document.getElementById('phone').value = '0469322594';
+    document.getElementById('dob').value = birthDate.toISOString().split('T')[0];
+    document.getElementById('address').value = '123 Test Street';
+    document.getElementById('city').value = 'Sydney';
+    document.getElementById('state').value = 'NSW';
+    document.getElementById('postcode').value = '2000';
+
+    // Trigger input event to show customer creation section
+    document.getElementById('personal-info-form').dispatchEvent(new Event('input'));
+});
+
 // Form validation - show customer creation section when form is valid
 document.getElementById('personal-info-form').addEventListener('input', function() {
     const form = document.getElementById('personal-info-form');

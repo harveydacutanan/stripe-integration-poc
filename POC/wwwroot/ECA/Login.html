@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECA - Customer Login</title>
+    <link rel="stylesheet" href="styles/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Existing Customer Area</h1>
+                <p>Welcome back! Please login to continue</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="customerId">Customer ID</label>
+                    <input
+                        type="text"
+                        id="customerId"
+                        name="customerId"
+                        placeholder="Enter your Stripe Customer ID (cus_...)"
+                        required
+                    >
+                    <small class="help-text">Format: cus_XXXXXXXXXXXXXXX</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                    >
+                </div>
+
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+                <button type="submit" class="btn-login">Login</button>
+            </form>
+
+            <div class="demo-info">
+                <h3>Demo Credentials</h3>
+                <p><strong>Customer ID:</strong> <code id="demoCustomerId">Use any valid Stripe customer ID</code></p>
+                <p><strong>Email:</strong> <code>Any email address</code></p>
+                <small>This is a demo login. In production, implement proper authentication.</small>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/login.js"></script>
+</body>
+</html>
