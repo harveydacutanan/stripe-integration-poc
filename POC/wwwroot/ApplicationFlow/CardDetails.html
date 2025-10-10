@@ -49,8 +49,8 @@
         </div>
 
         <div class="info" id="setup-intent-section" style="display: none; background: #f0f9e8; border-left: 4px solid #BBEE00;">
-            <h4 style="margin-bottom: 10px; color: #0B2828;">Step 2A: Create SetupIntent</h4>
-            <p style="margin-bottom: 15px;">Before saving your card, we need to create a SetupIntent with your Stripe Customer.</p>
+            <h4 style="margin-bottom: 10px; color: #0B2828;">Step 2A: Create SetupIntent (using Stripe .NET SDK)</h4>
+            <p style="margin-bottom: 15px;">Before saving your card, we need to create a SetupIntent to securely collect and save your payment method.</p>
             <button type="button" id="create-setupintent-btn" class="secondary">
                 <span id="create-setupintent-text">Create SetupIntent</span>
                 <span id="create-setupintent-spinner" class="hidden">Creating...</span>
@@ -60,7 +60,7 @@
 
         <form id="card-details-form" style="display: none;">
             <div class="form-group">
-                <label for="card-element">Card Information *</label>
+                <label for="card-element">Card Information * <span style="font-size: 12px; font-weight: normal; color: #666;">(Stripe Elements - JavaScript SDK)</span></label>
                 <div id="card-element"></div>
                 <div id="card-validation-info" style="margin-top: 10px; padding: 10px; border-radius: 6px; display: none; background: #f0f9e8; border-left: 4px solid #BBEE00;">
                     <p style="margin: 0; font-size: 14px; color: #0B2828;">

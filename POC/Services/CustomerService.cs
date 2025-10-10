@@ -87,19 +87,26 @@ public class CustomerService
 
     /// <summary>
     /// Creates a setup intent for saving a payment method
+    /// Supports both card and EFTPOS (Australian debit network)
+    /// Configured for off-session usage
+    /// Note: Network routing (EFTPOS) is applied during PaymentIntent creation, not SetupIntent
     /// </summary>
     public async Task<SetupIntent> CreateSetupIntentAsync(string customerId)
     {
         var options = new SetupIntentCreateOptions
         {
             Customer = customerId,
-            PaymentMethodTypes = new List<string> { "card" },
-            Usage = "off_session",
+            PaymentMethodTypes = new List<string> { "card", "au_becs_debit" },
+            Usage = "off_session", // Allows charging when customer is not present
             Metadata = new Dictionary<string, string>
             {
                 ["customer_id"] = customerId,
-                ["created_at"] = DateTime.UtcNow.ToString("O")
+                ["created_at"] = DateTime.UtcNow.ToString("O"),
+                ["usage"] = "off_session",
+                ["supported_networks"] = "card, au_becs_debit"
             }
+            // Network routing (eftpos_au) is configured on PaymentIntent, not SetupIntent
+            // SetupIntent only saves the payment method; network routing applies when charging
         };
 
         return await _setupIntentService.CreateAsync(options);

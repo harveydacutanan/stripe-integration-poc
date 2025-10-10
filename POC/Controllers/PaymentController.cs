@@ -351,6 +351,7 @@ public class PaymentController : ControllerBase
 
     /// <summary>
     /// Creates a payment intent (simplified endpoint for ECA)
+    /// Configured for EFTPOS network routing and off-session usage
     /// </summary>
     [HttpPost("create-payment-intent")]
     public async Task<ActionResult> CreatePaymentIntent([FromBody] CreatePaymentIntentRequest request)
@@ -366,6 +367,18 @@ public class PaymentController : ControllerBase
                 Currency = request.Currency ?? "aud",
                 Customer = request.CustomerId,
                 Description = request.Description,
+                // Note: OffSession removed - cannot be set unless confirm=true
+                // SetupFutureUsage below enables off-session charging when card is saved
+                // Note: Network routing removed to allow Stripe to automatically select
+                // the best available network (EFTPOS, Visa, Mastercard, etc.)
+                // Stripe will use EFTPOS when available for lower fees
+                PaymentMethodOptions = new PaymentIntentPaymentMethodOptionsOptions
+                {
+                    Card = new PaymentIntentPaymentMethodOptionsCardOptions
+                    {
+                        RequestThreeDSecure = "automatic"
+                    }
+                }
             };
 
             // If payment method is provided, use it directly

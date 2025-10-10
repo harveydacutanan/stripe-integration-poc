@@ -36,12 +36,14 @@ public class PaymentService
 
     /// <summary>
     /// Creates a payment intent with customer (with option to save payment method)
+    /// Configured for off-session usage with automatic network routing
+    /// Stripe will automatically use EFTPOS when available for lower fees
     /// </summary>
     public async Task<PaymentIntent> CreateCustomerPaymentIntentAsync(
         string customerId,
         decimal amount,
         bool savePaymentMethod,
-        string currency = "usd")
+        string currency = "aud")
     {
         var options = new PaymentIntentCreateOptions
         {
@@ -49,11 +51,23 @@ public class PaymentService
             Currency = currency,
             Customer = customerId,
             PaymentMethodTypes = new List<string> { "card" },
+            // Note: OffSession removed - cannot be set unless confirm=true
+            // SetupFutureUsage below enables off-session charging when card is saved
             Metadata = new Dictionary<string, string>
             {
                 ["payment_type"] = "customer_payment",
                 ["save_payment_method"] = savePaymentMethod.ToString(),
-                ["created_at"] = DateTime.UtcNow.ToString("O")
+                ["created_at"] = DateTime.UtcNow.ToString("O"),
+                ["off_session"] = "true"
+            },
+            // Configure card payment options with automatic network routing
+            // Stripe will choose the best network (EFTPOS, Visa, Mastercard, etc.)
+            PaymentMethodOptions = new PaymentIntentPaymentMethodOptionsOptions
+            {
+                Card = new PaymentIntentPaymentMethodOptionsCardOptions
+                {
+                    RequestThreeDSecure = "automatic"
+                }
             }
         };
 
@@ -68,12 +82,14 @@ public class PaymentService
 
     /// <summary>
     /// Creates a payment intent using an existing saved payment method
+    /// Configured for off-session payments with automatic network routing
+    /// Stripe will automatically use EFTPOS when available for lower fees
     /// </summary>
     public async Task<PaymentIntent> CreatePaymentIntentWithSavedMethodAsync(
         string customerId,
         string paymentMethodId,
         decimal amount,
-        string currency = "usd")
+        string currency = "aud")
     {
         var options = new PaymentIntentCreateOptions
         {
@@ -81,6 +97,7 @@ public class PaymentService
             Currency = currency,
             Customer = customerId,
             PaymentMethod = paymentMethodId,
+            OffSession = true, // Allow charging when customer is not present
             ConfirmationMethod = "manual",
             Confirm = true,
             ReturnUrl = "https://your-website.com/return", // You might want to make this configurable
@@ -88,7 +105,17 @@ public class PaymentService
             {
                 ["payment_type"] = "saved_method",
                 ["payment_method_id"] = paymentMethodId,
-                ["created_at"] = DateTime.UtcNow.ToString("O")
+                ["created_at"] = DateTime.UtcNow.ToString("O"),
+                ["off_session"] = "true"
+            },
+            // Configure card payment options with automatic network routing
+            // Stripe will choose the best network (EFTPOS, Visa, Mastercard, etc.)
+            PaymentMethodOptions = new PaymentIntentPaymentMethodOptionsOptions
+            {
+                Card = new PaymentIntentPaymentMethodOptionsCardOptions
+                {
+                    RequestThreeDSecure = "automatic"
+                }
             }
         };
 
