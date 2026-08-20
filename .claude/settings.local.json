@@ -7,7 +7,9 @@
       "Bash(gh secret set:*)",
       "Bash(az webapp config appsettings list:*)",
       "Bash(az webapp deploy:*)",
-      "Bash(az webapp show:*)"
+      "Bash(az webapp show:*)",
+      "Bash(gh workflow run:*)",
+      "WebFetch(domain:docs.stripe.com)"
     ],
     "deny": [],
     "ask": []
