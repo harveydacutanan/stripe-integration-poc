@@ -8,10 +8,12 @@
 </head>
 <body>
     <div class="login-container">
+        <a href="/home.html" class="btn-home">&larr; Back to home</a>
+
         <div class="login-card">
             <div class="login-header">
                 <h1>Existing Customer Area</h1>
-                <p>Welcome back! Please login to continue</p>
+                <p>Sign in with a Stripe customer to continue</p>
             </div>
 
             <form id="loginForm" class="login-form">
@@ -40,8 +42,16 @@
 
                 <div id="errorMessage" class="error-message" style="display: none;"></div>
 
-                <button type="submit" class="btn-login">Login</button>
+                <button type="submit" class="btn-login">Sign in</button>
             </form>
+
+            <div class="create-customer">
+                <p>No customer ID yet?</p>
+                <button type="button" id="createCustomerButton" class="btn-create-customer">
+                    Create a new test customer
+                </button>
+                <div id="createCustomerResult" class="create-customer-result" style="display: none;"></div>
+            </div>
 
             <div class="demo-info">
                 <h3>Demo Credentials</h3>

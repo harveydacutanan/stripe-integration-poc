@@ -51,3 +51,8 @@ node_modules/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Azure deployment credentials - never commit (this repo is public)
+publish-profile.xml
+*.PublishSettings
+*.pubxml.user

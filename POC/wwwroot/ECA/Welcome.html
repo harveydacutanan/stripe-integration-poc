@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ECA - Welcome Dashboard</title>
     <link rel="stylesheet" href="styles/welcome.css">
+    <link rel="stylesheet" href="styles/repayments.css">
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -13,6 +15,7 @@
                 <h1>Welcome Dashboard</h1>
                 <div class="user-info">
                     <span id="userEmail">Loading...</span>
+                    <a href="/home.html" class="btn-logout">&larr; Back to home</a>
                     <button id="logoutBtn" class="btn-logout">Logout</button>
                 </div>
             </div>
@@ -37,36 +40,153 @@
                 </div>
             </div>
 
-            <div class="actions-section">
-                <h2>Quick Actions</h2>
-                <div class="action-cards">
-                    <div class="action-card" id="makePaymentCard">
-                        <div class="action-icon">💳</div>
-                        <h3>Make a Payment</h3>
-                        <p>Process a payment using your saved payment methods or add a new one</p>
-                        <button class="btn-action" onclick="navigateToPayment()">Go to Payment</button>
-                    </div>
+            <!-- ============== Repayments: Apple Pay / Google Pay ==============
+                 Part of the Customer Area, not a separate destination. -->
+            <div class="dashboard-columns">
+                <div class="dashboard-column">
+                    <div class="repayments-card">
+                        <div class="card-heading">
+                            <h2>Make a payment</h2>
+                            <span class="card-heading-sub">Apple Pay &middot; Google Pay &middot; Debit card &middot; Direct debit</span>
+                        </div>
 
-                    <div class="action-card">
-                        <div class="action-icon">📋</div>
-                        <h3>Payment History</h3>
-                        <p>View your past transactions and payment history</p>
-                        <button class="btn-action" onclick="window.location.href='PaymentHistory.html'">View History</button>
-                    </div>
+                    <div id="envBanner" class="env-banner" hidden></div>
 
-                    <!-- <div class="action-card">
-                        <div class="action-icon">💰</div>
-                        <h3>Saved Payment Methods</h3>
-                        <p>Manage your saved cards and payment methods</p>
-                        <button class="btn-action" disabled>Coming Soon</button>
-                    </div>
+                    <!-- Step 1: Payment amount -->
+                    <section class="step" id="stepAmount">
+                        <div class="balance-card">
+                            <div class="label">Outstanding balance</div>
+                            <div class="amount" id="outstandingBalance">&mdash;</div>
+                            <div class="next-due" id="nextDue">&nbsp;</div>
+                        </div>
 
-                    <div class="action-card">
-                        <div class="action-icon">⚙️</div>
-                        <h3>Account Settings</h3>
-                        <p>Update your account information and preferences</p>
-                        <button class="btn-action" disabled>Coming Soon</button>
-                    </div> -->
+                        <h3 class="step-heading">Payment amount</h3>
+                        <div class="amount-display">
+                            <span class="currency">$</span>
+                            <input type="number" class="amount-input" id="amountInput" min="1" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="quick-amounts" id="quickAmounts"></div>
+                        <button type="button" class="btn-login" id="amountContinueButton" disabled>Continue</button>
+                    </section>
+
+                    <!-- Step 2: Payment method -->
+                    <section class="step" id="stepMethod" hidden>
+                        <h3 class="step-heading">Payment method</h3>
+                        <div class="method-list" id="methodList"></div>
+                        <button type="button" class="link-button block-link" id="bankTransferLink">
+                            How to pay via bank transfer
+                        </button>
+                        <div class="wallet-availability-note" id="walletAvailabilityNote">
+                            Checking whether this device can pay with a wallet&hellip;
+                        </div>
+                        <button type="button" class="btn-login" id="methodContinueButton" disabled>Continue</button>
+                        <button type="button" class="btn-secondary-flow" id="methodBackButton">Back</button>
+                    </section>
+
+                    <!-- Step 3: Review and finalise -->
+                    <section class="step" id="stepReview" hidden>
+                        <h3 class="step-heading">Review &amp; finalise</h3>
+                        <div class="summary-row">
+                            <span class="key">To</span>
+                            <span class="val" id="reviewTo">&mdash;</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="key">Amount</span>
+                            <span class="val" id="reviewAmount">&mdash;</span>
+                        </div>
+                        <div class="summary-row" id="reviewSurchargeRow">
+                            <span class="key" id="reviewSurchargeKey">Card surcharge</span>
+                            <span class="val" id="reviewSurcharge">&mdash;</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="key">Method</span>
+                            <span class="val" id="reviewMethod">&mdash;</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span class="key">Total</span>
+                            <span class="val" id="reviewTotal">&mdash;</span>
+                        </div>
+                        <p class="note" id="reviewNote"></p>
+
+                        <!-- Debit card: saved cards if the customer has any, otherwise the
+                             Stripe Payment Element. Shown only for the card method. -->
+                        <div id="cardEntryBlock" hidden>
+                            <h3 class="step-heading">Card details</h3>
+
+                            <div id="savedCardsBlock" hidden>
+                                <div class="saved-card-list" id="savedCardList"></div>
+                                <button type="button" class="link-button block-link" id="useNewCardButton">
+                                    + Use a different card
+                                </button>
+                            </div>
+
+                            <div id="newCardBlock">
+                                <div class="card-element-host" id="card-payment-element"></div>
+                                <label class="save-card-option">
+                                    <input type="checkbox" id="saveCardCheckbox">
+                                    <span>Save this card so I can reuse it next time</span>
+                                </label>
+                                <button type="button" class="link-button block-link" id="useSavedCardButton" hidden>
+                                    &larr; Use a saved card
+                                </button>
+                            </div>
+
+                            <div class="error-text" id="cardError"></div>
+                        </div>
+
+                        <!-- Apple Pay / Google Pay: the Express Checkout Element renders the
+                             branded wallet button, which is what Apple and Google require as the CTA. -->
+                        <div id="wallet-button-container"></div>
+                        <button type="button" class="btn-login" id="finaliseButton" hidden>Finalise payment</button>
+                        <button type="button" class="btn-secondary-flow" id="reviewBackButton">Back</button>
+                    </section>
+
+                    <!-- Processing -->
+                    <section class="step" id="stepProcessing" hidden>
+                        <div class="processing">
+                            <div class="spinner"></div>
+                            <p>Confirming your payment&hellip;</p>
+                        </div>
+                    </section>
+
+                    <!-- Success -->
+                    <section class="step" id="stepSuccess" hidden>
+                        <div class="success-panel">
+                            <div class="success-tick">&#10003;</div>
+                            <h2 id="successAmount">&mdash;</h2>
+                            <p class="meta" id="successMeta"></p>
+                        </div>
+                        <ul class="detail-list" id="successDetails"></ul>
+                        <button type="button" class="btn-login" id="successDoneButton">Make another repayment</button>
+                    </section>
+
+                    <!-- Scheduled (bank direct debit) -->
+                    <section class="step" id="stepScheduled" hidden>
+                        <div class="success-panel">
+                            <div class="success-tick">&#128197;</div>
+                            <h2>Payment scheduled</h2>
+                            <p class="meta" id="scheduledMeta"></p>
+                        </div>
+                        <button type="button" class="btn-login" id="scheduledDoneButton">Make another repayment</button>
+                    </section>
+                </div>
+
+                </div>
+
+                <div class="dashboard-column">
+                    <div class="repayments-card">
+                        <div class="card-heading">
+                            <h2>Payment history</h2>
+                            <span class="card-heading-sub">Your repayments, newest first</span>
+                        </div>
+                        <div class="history-list" id="historyList">
+                            <div class="empty-state">Loading your repayments&hellip;</div>
+                        </div>
+                        <div class="card-footer-actions">
+                            <button type="button" class="link-button" id="viewMoreButton">View more</button>
+                            <a class="link-button" href="PaymentHistory.html">All Stripe transactions &rarr;</a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -77,6 +197,63 @@
         </main>
     </div>
 
+
+    <!-- Receipt screen (opened from a repayment history entry) -->
+    <div class="modal-backdrop" id="receiptModal" hidden>
+        <div class="modal">
+            <button type="button" class="modal-close" data-close="receiptModal" aria-label="Close">&times;</button>
+            <h3>Receipt</h3>
+            <ul class="detail-list" id="receiptDetails"></ul>
+            <div class="modal-actions" style="margin-top:18px">
+                <a class="btn-login" id="stripeReceiptLink" href="#" target="_blank" rel="noopener" hidden>
+                    View Stripe receipt
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error modal: wallet declines dismiss the native sheet and land here -->
+    <div class="modal-backdrop" id="errorModal" hidden>
+        <div class="modal">
+            <button type="button" class="modal-close" data-close="errorModal" aria-label="Close">&times;</button>
+            <h3 id="errorTitle">Payment could not be processed</h3>
+            <p id="errorDescription"></p>
+            <div class="modal-actions">
+                <button type="button" class="btn-login" id="errorPrimaryButton">Try again</button>
+                <button type="button" class="btn-secondary-flow" id="errorSecondaryButton">Choose another method</button>
+            </div>
+            <div class="decline-code" id="errorDeclineCode"></div>
+        </div>
+    </div>
+
+    <!-- Full balance confirmation -->
+    <div class="modal-backdrop" id="fullBalanceModal" hidden>
+        <div class="modal">
+            <button type="button" class="modal-close" data-close="fullBalanceModal" aria-label="Close">&times;</button>
+            <h3>Pay your full balance?</h3>
+            <p id="fullBalanceCopy"></p>
+            <div class="modal-actions">
+                <button type="button" class="btn-login" id="confirmFullBalanceButton">Yes, pay full balance</button>
+                <button type="button" class="btn-secondary-flow" data-close="fullBalanceModal">Go back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bank transfer details -->
+    <div class="modal-backdrop" id="bankTransferModal" hidden>
+        <div class="modal">
+            <button type="button" class="modal-close" data-close="bankTransferModal" aria-label="Close">&times;</button>
+            <h3>Pay by bank transfer</h3>
+            <p>Use these details in your own banking app. Always include the reference so we can match your payment.</p>
+            <ul class="detail-list" id="bankTransferDetails"></ul>
+            <div class="modal-actions" style="margin-top:18px">
+                <button type="button" class="btn-login" id="copyBankDetailsButton">Copy details</button>
+            </div>
+            <div class="decline-code" id="copyToast" hidden>Copied to clipboard</div>
+        </div>
+    </div>
+
+    <script src="scripts/repayments.js"></script>
     <script src="scripts/welcome.js"></script>
 </body>
 </html>

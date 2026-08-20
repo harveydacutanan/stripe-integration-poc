@@ -8,7 +8,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Setup event listeners
     document.getElementById('logoutBtn').addEventListener('click', logout);
+
+    // Boot the repayments section of the Customer Area
+    startRepayments();
 });
+
+function startRepayments() {
+    const customerId = sessionStorage.getItem('eca_customerId');
+
+    if (!customerId) {
+        return;
+    }
+
+    startRepaymentDemo(customerId).catch(function(error) {
+        console.error('Could not load the repayments section', error);
+        document.getElementById('historyList').innerHTML =
+            '<div class="empty-state">Repayments are unavailable right now.</div>';
+    });
+}
 
 function checkAuthentication() {
     const isAuthenticated = sessionStorage.getItem('eca_authenticated');
@@ -28,10 +45,6 @@ function loadCustomerInfo() {
         document.getElementById('displayCustomerId').textContent = customerId;
         document.getElementById('displayEmail').textContent = email;
     }
-}
-
-function navigateToPayment() {
-    window.location.href = 'Payment.html';
 }
 
 function logout() {

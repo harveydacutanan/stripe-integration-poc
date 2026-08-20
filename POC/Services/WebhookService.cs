@@ -8,11 +8,16 @@ public class WebhookService
 {
     private readonly ILogger<WebhookService> _logger;
     private readonly IConfiguration _configuration;
+    private readonly WebhookStorageService _storageService;
 
-    public WebhookService(ILogger<WebhookService> logger, IConfiguration configuration)
+    public WebhookService(
+        ILogger<WebhookService> logger,
+        IConfiguration configuration,
+        WebhookStorageService storageService)
     {
         _logger = logger;
         _configuration = configuration;
+        _storageService = storageService;
     }
 
     /// <summary>
@@ -21,6 +26,7 @@ public class WebhookService
     public async Task<WebhookProcessingResult> ProcessWebhookEventAsync(Event stripeEvent)
     {
         var result = new WebhookProcessingResult();
+        WebhookEventData? eventData = null;
 
         try
         {
@@ -28,7 +34,21 @@ public class WebhookService
                 stripeEvent.Id, stripeEvent.Type);
 
             // Extract event data
-            var eventData = ExtractEventData(stripeEvent);
+            eventData = ExtractEventData(stripeEvent);
+
+            // Check for duplicate events (idempotency)
+            var isAlreadyProcessed = await _storageService.IsEventProcessedAsync(
+                stripeEvent.Id, stripeEvent.Type);
+
+            if (isAlreadyProcessed)
+            {
+                _logger.LogWarning("Duplicate webhook event detected and skipped: {EventId}", stripeEvent.Id);
+                return new WebhookProcessingResult
+                {
+                    Success = true,
+                    Message = $"Duplicate event {stripeEvent.Id} skipped"
+                };
+            }
 
             // Process based on event type
             result = stripeEvent.Type switch
@@ -48,6 +68,9 @@ public class WebhookService
                 _ => await HandleUnknownEvent(stripeEvent, eventData)
             };
 
+            // Store the webhook event in Azure Table Storage
+            await _storageService.StoreWebhookEventAsync(eventData, result);
+
             if (result.Success)
             {
                 _logger.LogInformation("Successfully processed webhook event: {EventId}", stripeEvent.Id);
@@ -64,12 +87,27 @@ public class WebhookService
         {
             _logger.LogError(ex, "Error processing webhook event: {EventId}", stripeEvent.Id);
 
-            return new WebhookProcessingResult
+            var errorResult = new WebhookProcessingResult
             {
                 Success = false,
                 Message = "Webhook processing failed",
                 ErrorDetails = ex.Message
             };
+
+            // Try to store the failed event
+            if (eventData != null)
+            {
+                try
+                {
+                    await _storageService.StoreWebhookEventAsync(eventData, errorResult);
+                }
+                catch (Exception storageEx)
+                {
+                    _logger.LogError(storageEx, "Failed to store failed webhook event: {EventId}", stripeEvent.Id);
+                }
+            }
+
+            return errorResult;
         }
     }
 
