@@ -135,7 +135,8 @@ function viewReceipt(url) {
 }
 
 function makePayment() {
-    window.location.href = 'Payment.html';
+    // Payments now happen in the repayments section of the Customer Area dashboard.
+    window.location.href = 'Welcome.html';
 }
 
 function goBack() {
